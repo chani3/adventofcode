@@ -3,7 +3,12 @@
 #fuel/module = mass / 3, round down, subtract 2.
 #part 2! mass done recursively until it stops changing.
 def fuelFor(mass)
-	mass.to_i/3-2
+	fuel = mass.to_i/3-2
+	if (fuel <= 0)
+		0
+	else
+		fuel + fuelFor(fuel)
+	end
 end
 p DATA.readlines.reduce(0) { |sum, mass| sum + fuelFor(mass) }
 
