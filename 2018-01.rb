@@ -4,6 +4,8 @@
 #input: signed numbers, format: +1, -2, +3 ?
 #output: final frequency, eg. 3
 
+p DATA.readlines.reduce(0) { |sum, input| sum + input.to_i }
+
 __END__
 -1
 -19
