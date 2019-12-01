@@ -7,7 +7,7 @@
 #part 2 output: first frequency reached twice; might have to loop the data
 
 $data = DATA.readlines
-$frequencies = [0]
+$frequencies = { 0 => true }
 $currentFrequency = 0
 
 def scan_data
@@ -15,15 +15,15 @@ loop do
 	$data.each { |delta|
 		$currentFrequency += delta.to_i
 		#p $frequencies
-		if $frequencies.include?($currentFrequency)
+		if $frequencies[$currentFrequency]
 			p "found #{$currentFrequency}"
 			return $currentFrequency
 		else
 			#p "adding #{$currentFrequency}"
-			$frequencies << $currentFrequency
+			$frequencies[$currentFrequency] = true
 		end
 	}
-	p "searching again, #{$frequencies} entries"
+	#p "searching again, #{$frequencies} entries"
 end
 end
 
