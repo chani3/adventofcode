@@ -1,12 +1,33 @@
 #!/usr/bin/ruby
+
 #problem 2018-1
 
 #input: signed numbers, format: +1, -2, +3 ?
 #output: final frequency, eg. 3
 #part 2 output: first frequency reached twice; might have to loop the data
 
-data = DATA.readlines
-p data.reduce(0) { |sum, input| sum + input.to_i }
+$data = DATA.readlines
+$frequencies = [0]
+$currentFrequency = 0
+
+def scan_data
+loop do
+	$data.each { |delta|
+		$currentFrequency += delta.to_i
+		#p $frequencies
+		if $frequencies.include?($currentFrequency)
+			p "found #{$currentFrequency}"
+			return $currentFrequency
+		else
+			#p "adding #{$currentFrequency}"
+			$frequencies << $currentFrequency
+		end
+	}
+	p "searching again, #{$frequencies} entries"
+end
+end
+
+scan_data
 
 __END__
 -1
