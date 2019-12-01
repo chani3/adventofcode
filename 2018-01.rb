@@ -3,8 +3,10 @@
 
 #input: signed numbers, format: +1, -2, +3 ?
 #output: final frequency, eg. 3
+#part 2 output: first frequency reached twice; might have to loop the data
 
-p DATA.readlines.reduce(0) { |sum, input| sum + input.to_i }
+data = DATA.readlines
+p data.reduce(0) { |sum, input| sum + input.to_i }
 
 __END__
 -1
