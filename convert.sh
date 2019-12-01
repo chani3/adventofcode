@@ -4,4 +4,6 @@
 input=$1
 output=$2
 
-echo -e "#!/usr/bin/ruby\n\n__END__\n" | cat - $1 > $2
+echo -e "#!/usr/bin/ruby\n\np DATA.readlines[0]\n\n__END__" | cat - $1 > $2
+chmod +x $2
+
