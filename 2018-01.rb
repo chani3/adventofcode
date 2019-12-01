@@ -1,3 +1,10 @@
+#!/usr/bin/ruby
+#problem 2018-1
+
+#input: signed numbers, format: +1, -2, +3 ?
+#output: final frequency, eg. 3
+
+__END__
 -1
 -19
 -7
