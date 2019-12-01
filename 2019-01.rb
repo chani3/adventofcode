@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
-p DATA.readlines[0]
+#fuel/module = mass / 3, round down, subtract 2.
+p DATA.readlines.reduce(0) { |sum, mass| sum + mass.to_i/3 - 2 }
 
 __END__
 142195
