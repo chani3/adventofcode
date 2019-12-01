@@ -1,7 +1,11 @@
 #!/usr/bin/ruby
 
 #fuel/module = mass / 3, round down, subtract 2.
-p DATA.readlines.reduce(0) { |sum, mass| sum + mass.to_i/3 - 2 }
+#part 2! mass done recursively until it stops changing.
+def fuelFor(mass)
+	mass.to_i/3-2
+end
+p DATA.readlines.reduce(0) { |sum, mass| sum + fuelFor(mass) }
 
 __END__
 142195
