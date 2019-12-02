@@ -1,22 +1,32 @@
 #!/usr/bin/ruby
 #output: number of lines with some character exactly 2 times * 3 times
 $data = DATA.readlines
-$twoCount = 0
-$threeCount = 0
 
-$data.each { |line|
-    charCounts = Hash.new(0)
-    line.each_char { |char|
-        charCounts[char]+=1
+def almostEquals(strA, strB)
+    list = strA.chars.zip(strB.chars)
+    firstDiffIndex = -1
+    list.each_with_index { |(a, b), i|
+        if a != b
+            if firstDiffIndex == -1
+                firstDiffIndex = i
+            else
+                return false
+            end
+        end
     }
-    if charCounts.value?(2)
-        $twoCount+=1
-    end
-    if charCounts.value?(3)
-        $threeCount+=1
-    end
+    #I'm assuming no two strings are perfectly identical
+    strA.slice!(firstDiffIndex)
+    p strA
+end
+
+$data.each_with_index { |line, index|
+    #compare line to each item below it
+    $data[index+1..-1].each { |lineB|
+        if almostEquals(line, lineB)
+            return
+        end
+    }
 }
-p $twoCount * $threeCount
 
 __END__
 cnjxpritdzhubeseewfmqagkul
