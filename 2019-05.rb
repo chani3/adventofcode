@@ -1,11 +1,11 @@
 #!/usr/bin/ruby
 
 data=DATA.readlines[0].split(',').map(&:to_i)
-$input = 1
+$input = 5
 
-opSum = { params: 3, ret: true, run: Proc.new { |a, b| a + b } }
-opMult = { params: 3, ret: true, run: Proc.new{ |a, b| a * b } }
-opInput = { params: 1, ret: true, run: Proc.new{ $input }}
+opSum = { params: 3, ret: :value, run: Proc.new { |a, b| a + b } }
+opMult = { params: 3, ret: :value, run: Proc.new{ |a, b| a * b } }
+opInput = { params: 1, ret: :value, run: Proc.new{ $input }}
 opOutput = { params: 1, run: Proc.new{ |o| p "output: #{o}"
     if o[0] != 0
         p "abort"
@@ -13,7 +13,26 @@ opOutput = { params: 1, run: Proc.new{ |o| p "output: #{o}"
     end
 }}
 opEnd = { params: 0, run: Proc.new{ exit }}
-opCodes = { 1 => opSum, 2 => opMult, 3 => opInput, 4 => opOutput, 9 => opEnd }
+opJumpT = { params: 2, ret: :jump, run: Proc.new{ |test, p|
+    if test != 0
+        p
+    else
+        -1
+    end
+}}
+opJumpF = { params: 2, ret: :jump, run: Proc.new{ |test, p|
+    if test == 0
+        p
+    else
+        -1
+    end
+}}
+opLess = { params: 3, ret: :value, run: Proc.new{ |a, b| a < b ? 1 : 0}}
+opEqual = { params: 3, ret: :value, run: Proc.new{ |a, b| a == b ? 1 : 0}}
+
+opCodes = { 1 => opSum, 2 => opMult, 3 => opInput, 4 => opOutput,
+            5 => opJumpT, 6 => opJumpF, 7 => opLess, 8 => opEqual,
+            9 => opEnd }
 
 p "18 and 165: #{data[18]} #{data[165]}"
 ip = 0
@@ -37,15 +56,17 @@ loop do
             #p "normal mode #{i}"
         end
     }
+    ip += 1
     #p paramAddrs
     params = paramAddrs.map { |addr| data[addr] }
     p params
     ret = op[:run].call(params)
     #p "returned #{ret}"
-    if (op[:ret])
+    if (op[:ret] == :value)
         data[paramAddrs.last] = ret
+    elsif op[:ret] == :jump && ret >= 0
+        ip = ret
     end
-    ip += 1
 end
 
 __END__
