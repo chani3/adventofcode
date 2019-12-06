@@ -22,7 +22,9 @@ def findOrCreateNode(name, branch)
     return node
 end
 
-orphans = findOrCreateNode("!ROOT", []) 
+orphans = findOrCreateNode("!ROOT", [])
+youNode = nil
+sanNode = nil
 
 #build tree
 data.each { |line|
@@ -39,15 +41,33 @@ data.each { |line|
     end
     child[:parent] = parent
     parent[:children] << child
-}
 
+    if childName == "YOU"
+        p "found you"
+        youNode = child
+    elsif childName == "SAN"
+        p "found san"
+        sanNode = child
+    end
+}
 p "orphans: #{orphans[:children].length}" #should be 1
 
-#count orbits
-def sumOrbits(level, node)
-    return node[:children].sum(level) { |child| sumOrbits(level+1, child)}
+def findParents(node)
+    if (node[:name] == "!ROOT")
+        return []
+    end
+    return findParents(node[:parent]).push(node)
 end
-p sumOrbits(0, orphans[:children].first)
+youParents = findParents(youNode[:parent])
+sanParents = findParents(sanNode[:parent])
+path = (youParents - sanParents) + (sanParents - youParents)
+p path.length
+
+#count orbits
+#def sumOrbits(level, node)
+#    return node[:children].sum(level) { |child| sumOrbits(level+1, child)}
+#end
+#p sumOrbits(0, orphans[:children].first)
 
 __END__
 797)67Y
