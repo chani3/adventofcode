@@ -11,65 +11,72 @@ def getInput
     return $input.shift
 end
 
-def runCode(data, input)
-opSum = { params: 3, ret: :value, run: Proc.new { |a, b| a + b } }
-opMult = { params: 3, ret: :value, run: Proc.new{ |a, b| a * b } }
-opInput = { params: 1, ret: :value, run: Proc.new{ getInput }}
-opOutput = { params: 1, run: Proc.new{ |o| $output = o[0] }}
-opEnd = { params: 0, run: Proc.new{ return }}
-opJumpT = { params: 2, ret: :jump, run: Proc.new{ |test, p|
+class IntCode
+    opSum = { params: 3, ret: :value, run: Proc.new { |a, b| a + b } }
+    opMult = { params: 3, ret: :value, run: Proc.new{ |a, b| a * b } }
+    opInput = { params: 1, ret: :value, run: Proc.new{ getInput }}
+    opOutput = { params: 1, run: Proc.new{ |o| $output = o[0] }}
+    opEnd = { params: 0, ret: :exit, run: Proc.new{}} #fffff return broke
+    opJumpT = { params: 2, ret: :jump, run: Proc.new{ |test, p|
     if test != 0
         p
     else
         -1
     end
 }}
-opJumpF = { params: 2, ret: :jump, run: Proc.new{ |test, p|
+    opJumpF = { params: 2, ret: :jump, run: Proc.new{ |test, p|
     if test == 0
         p
     else
         -1
     end
 }}
-opLess = { params: 3, ret: :value, run: Proc.new{ |a, b| a < b ? 1 : 0}}
-opEqual = { params: 3, ret: :value, run: Proc.new{ |a, b| a == b ? 1 : 0}}
+    opLess = { params: 3, ret: :value, run: Proc.new{ |a, b| a < b ? 1 : 0}}
+    opEqual = { params: 3, ret: :value, run: Proc.new{ |a, b| a == b ? 1 : 0}}
 
-opCodes = { 1 => opSum, 2 => opMult, 3 => opInput, 4 => opOutput,
+    OpCodes = { 1 => opSum, 2 => opMult, 3 => opInput, 4 => opOutput,
             5 => opJumpT, 6 => opJumpF, 7 => opLess, 8 => opEqual,
             9 => opEnd }
 
-    initInput(input)
-    ip = 0
-    loop do
-        opField = data[ip].digits
-        opCode = opField[0]
-        paramModes = opField.slice(2,3)
-        paramAddrs = []
-        op = opCodes[opCode]
-        #p "opfield is #{opField}"
-        #p "op is #{op}"
-        #p "pM is #{paramModes}"
-        #get params
-        op[:params].times { |i|
-            ip+=1
-            if paramModes && paramModes[i] == 1
-                paramAddrs[i] = ip
-                #p "direct mode #{i}"
-            else
-                paramAddrs[i] = data[ip]
-                #p "normal mode #{i}"
+    def initialize(data, input)
+        @data = data.dup
+        initInput(input)
+    end
+    def run()
+        ip = 0
+        loop do
+            opField = @data[ip].digits
+            opCode = opField[0]
+            paramModes = opField.slice(2,3)
+            paramAddrs = []
+            op = OpCodes[opCode]
+            #p "opfield is #{opField}"
+            #p "op is #{op}"
+            #p "pM is #{paramModes}"
+            #get params
+            op[:params].times { |i|
+                ip+=1
+                if paramModes && paramModes[i] == 1
+                    paramAddrs[i] = ip
+                    #p "direct mode #{i}"
+                else
+                    paramAddrs[i] = @data[ip]
+                    #p "normal mode #{i}"
+                end
+            }
+            ip += 1
+            #p paramAddrs
+            params = paramAddrs.map { |addr| @data[addr] }
+            #p params
+            ret = op[:run].call(params)
+            #p "returned #{ret}"
+            if (op[:ret] == :value)
+                @data[paramAddrs.last] = ret
+            elsif op[:ret] == :jump && ret >= 0
+                ip = ret
+            elsif op[:ret] == :exit
+                return
             end
-        }
-        ip += 1
-        #p paramAddrs
-        params = paramAddrs.map { |addr| data[addr] }
-        #p params
-        ret = op[:run].call(params)
-        #p "returned #{ret}"
-        if (op[:ret] == :value)
-            data[paramAddrs.last] = ret
-        elsif op[:ret] == :jump && ret >= 0
-            ip = ret
         end
     end
 end
@@ -78,7 +85,7 @@ def trySequence(seq, data)
     p "trying #{seq}"
     acc = 0
     seq.each { |setting|
-        runCode(data.dup, [setting, acc])
+        IntCode.new(data, [setting, acc]).run()
         acc = $output
     }
     return acc
