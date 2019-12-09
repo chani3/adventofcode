@@ -60,32 +60,32 @@ class IntCode
             paramModes ||= [] 
             paramAddrs = []
             op = OpCodes[opCode]
-            p "opfield is #{opField}"
+            #p "opfield is #{opField}"
             #p "op is #{op}"
             if op[:ret] == :exit
                 return
             end
 
-            p "pM is #{paramModes}"
+            #p "pM is #{paramModes}"
             #get params
             op[:params].times { |i|
                 ip+=1
                 if paramModes[i] == 1
                     paramAddrs[i] = ip
-                    p "direct mode #{i}"
+                    #p "direct mode #{i}"
                 else
                     paramAddrs[i] = @data[ip]
                     #p "normal mode #{i}"
                     if paramModes[i] == 2
                         paramAddrs[i] += relBase
-                        p "rel mode #{i}"
+                        #p "rel mode #{i}"
                     end
                 end
             }
             ip += 1
             #p paramAddrs
             params = paramAddrs.map { |addr| @data[addr] }
-            p params
+            #p params
             ret = op[:run].call(params)
             #p "returned #{ret}"
             if (op[:ret] == :value)
@@ -94,14 +94,14 @@ class IntCode
                 ip = ret
             elsif op[:ret] == :rb
                 relBase += ret
-                p "set rb to #{relBase}"
+                #p "set rb to #{relBase}"
             end
         end
     end
 end
 
 
-code = IntCode.new(sData, [1])
+code = IntCode.new(sData, [2])
 code.run()
 
 __END__
