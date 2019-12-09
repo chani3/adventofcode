@@ -1,46 +1,59 @@
 #!/usr/bin/ruby
 
 sData=DATA.readlines[0].split(',').map(&:to_i)
-#io is suuuch a hack atm
-$output = 0
-$input = []
-def initInput(values)
-    $input = values
-end
-def getInput
-    return $input.shift
-end
 
 class IntCode
-    opSum = { params: 3, ret: :value, run: Proc.new { |a, b| a + b } }
-    opMult = { params: 3, ret: :value, run: Proc.new{ |a, b| a * b } }
-    opInput = { params: 1, ret: :value, run: Proc.new{ getInput }}
-    opOutput = { params: 1, run: Proc.new{ |o| $output = o[0] }}
-    opEnd = { params: 0, ret: :exit, run: Proc.new{}} #fffff return broke
-    opJumpT = { params: 2, ret: :jump, run: Proc.new{ |test, p|
-    if test != 0
-        p
-    else
-        -1
+    def getInput
+        p "pulling from #{@inQ}"
+        return @inQ.pop
     end
-}}
-    opJumpF = { params: 2, ret: :jump, run: Proc.new{ |test, p|
-    if test == 0
-        p
-    else
-        -1
+    def output(o)
+        @outQ << o
     end
-}}
-    opLess = { params: 3, ret: :value, run: Proc.new{ |a, b| a < b ? 1 : 0}}
-    opEqual = { params: 3, ret: :value, run: Proc.new{ |a, b| a == b ? 1 : 0}}
+    def sum(a, b)
+        a + b
+    end
+    def mult(a, b)
+        a*b
+    end
+    opSum = { params: 3, ret: :value, run: :sum }
+    opMult = { params: 3, ret: :value, run: :mult }
+    opInput = { params: 1, ret: :value, run: :getInput }
+    opOutput = { params: 1, run: :output }
+    opEnd = { params: 0, ret: :exit } #fffff return broke
+    opJumpT = { params: 2, ret: :jump, run: :jumpT }
+    def jumpT(test, p)
+        if test != 0
+            p
+        else
+            -1
+        end
+    end
+    opJumpF = { params: 2, ret: :jump, run: :jumpF }
+    def jumpF(test, p)
+        if test == 0
+            p
+        else
+            -1
+        end
+    end
+    opLess = { params: 3, ret: :value, run: :less }
+    def less(a, b)
+        a < b ? 1 : 0
+    end
+    opEqual = { params: 3, ret: :value, run: :equal }
+    def equal(a, b)
+        a == b ? 1 : 0
+    end
 
     OpCodes = { 1 => opSum, 2 => opMult, 3 => opInput, 4 => opOutput,
             5 => opJumpT, 6 => opJumpF, 7 => opLess, 8 => opEqual,
             9 => opEnd }
 
-    def initialize(data, input)
+    def initialize(data, inputQueue, outputQueue)
         @data = data.dup
-        initInput(input)
+        @inQ = inputQueue
+        @outQ = outputQueue
     end
     def run()
         ip = 0
@@ -52,6 +65,10 @@ class IntCode
             op = OpCodes[opCode]
             #p "opfield is #{opField}"
             #p "op is #{op}"
+            if op[:ret] == :exit
+                return
+            end
+
             #p "pM is #{paramModes}"
             #get params
             op[:params].times { |i|
@@ -67,15 +84,17 @@ class IntCode
             ip += 1
             #p paramAddrs
             params = paramAddrs.map { |addr| @data[addr] }
+            #have to get the exact right # of args now
+            if (op[:ret] == :value)
+                params.pop
+            end
             #p params
-            ret = op[:run].call(params)
+            ret = self.send(op[:run], *params)
             #p "returned #{ret}"
             if (op[:ret] == :value)
                 @data[paramAddrs.last] = ret
             elsif op[:ret] == :jump && ret >= 0
                 ip = ret
-            elsif op[:ret] == :exit
-                return
             end
         end
     end
@@ -83,18 +102,30 @@ end
 
 def trySequence(seq, data)
     p "trying #{seq}"
-    acc = 0
-    seq.each { |setting|
-        IntCode.new(data, [setting, acc]).run()
-        acc = $output
+    queues = Array.new(5) {Queue.new}
+    amps = []
+
+    seq.each_with_index { |setting, i|
+        queues[i] << setting
+        amps << IntCode.new(data, queues[i], queues[(i+1)%5])
     }
-    return acc
+    queues[0] << 0
+    #run in threads
+    threads = []
+    amps.each { |amp|
+        threads << Thread.new {
+            amp.run
+        }
+    }
+    threads.last.join
+
+    return queues[0].pop
 end
 
 p "hello"
 maxSignal = 0
 
-(0..4).to_a.permutation { |p|
+(5..9).to_a.permutation { |p|
     signal = trySequence(p, sData)
     if signal > maxSignal
         maxSignal = signal
