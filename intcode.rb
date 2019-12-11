@@ -1,7 +1,7 @@
 
 class IntCode
     def getInput
-        p "pulling from #{@inQ}"
+        #p "pulling from #{@inQ}"
         return @inQ.pop
     end
     def output(o)
@@ -42,10 +42,14 @@ class IntCode
     def equal(a, b)
         a == b ? 1 : 0
     end
+    opRelBase = { params: 1, ret: :rb, run: :adjRelBase }
+    def adjRelBase(a)
+        a
+    end
 
     OpCodes = { 1 => opSum, 2 => opMult, 3 => opInput, 4 => opOutput,
             5 => opJumpT, 6 => opJumpF, 7 => opLess, 8 => opEqual,
-            9 => opEnd }
+            9 => opRelBase, 99 => opEnd }
 
     def initialize(data, inputQueue, outputQueue)
         @data = data.dup
@@ -54,10 +58,15 @@ class IntCode
     end
     def run()
         ip = 0
+        relBase = 0
         loop do
             opField = @data[ip].digits
             opCode = opField[0]
+            if opField[1]
+                opCode += 10*opField[1]
+            end
             paramModes = opField.slice(2,3)
+            paramModes ||= [] 
             paramAddrs = []
             op = OpCodes[opCode]
             #p "opfield is #{opField}"
@@ -70,12 +79,16 @@ class IntCode
             #get params
             op[:params].times { |i|
                 ip+=1
-                if paramModes && paramModes[i] == 1
+                if paramModes[i] == 1
                     paramAddrs[i] = ip
                     #p "direct mode #{i}"
                 else
                     paramAddrs[i] = @data[ip]
                     #p "normal mode #{i}"
+                    if paramModes[i] == 2
+                        paramAddrs[i] += relBase
+                        #p "rel mode #{i}"
+                    end
                 end
             }
             ip += 1
@@ -92,6 +105,9 @@ class IntCode
                 @data[paramAddrs.last] = ret
             elsif op[:ret] == :jump && ret >= 0
                 ip = ret
+            elsif op[:ret] == :rb
+                relBase += ret
+                #p "set rb to #{relBase}"
             end
         end
     end
