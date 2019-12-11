@@ -1,10 +1,13 @@
 
 class IntCode
     def getInput
-        #p "pulling from #{@inQ}"
-        return @inQ.pop
+        p "input"
+        num = @inQ.pop
+        p "got #{num}"
+        return num
     end
     def output(o)
+        p "output #{o}"
         @outQ << o
     end
     def sum(a, b)
@@ -92,13 +95,13 @@ class IntCode
                 end
             }
             ip += 1
-            #p paramAddrs
-            params = paramAddrs.map { |addr| @data[addr] }
+            #p "addrs #{paramAddrs}"
+            params = paramAddrs.map { |addr| @data[addr] || 0 }
             #have to get the exact right # of args now
             if (op[:ret] == :value)
                 params.pop
             end
-            #p params
+            #p "params #{params}"
             ret = self.send(op[:run], *params)
             #p "returned #{ret}"
             if (op[:ret] == :value)
