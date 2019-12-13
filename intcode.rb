@@ -3,11 +3,11 @@ class IntCode
     def getInput
         p "input"
         num = @inQ.pop
-        p "got #{num}"
+        #p "got #{num}"
         return num
     end
     def output(o)
-        p "output #{o}"
+        #p "output #{o}"
         @outQ << o
     end
     def sum(a, b)
