@@ -51,8 +51,19 @@ def tick(moons)
     moons.each { |moon| applyV(moon) }
 end
 
-1000.times { tick(moons) }
-p moons.sum { |e| energyOf(e) }
+#1000.times { tick(moons) }
+#p moons.sum { |e| energyOf(e) }
+
+history = { moons.dup => true }
+time = 0
+
+loop do
+    time += 1
+    tick(moons)
+    break if history[moons]
+    history[moons.dup] = true
+end
+p time
 
 __END__
 <x=14, y=4, z=5>
