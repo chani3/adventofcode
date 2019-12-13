@@ -1,7 +1,7 @@
 
 class IntCode
     def getInput
-        p "input"
+        #p "input"
         num = @inQ.pop
         #p "got #{num}"
         return num
@@ -59,6 +59,10 @@ class IntCode
         @inQ = inputQueue
         @outQ = outputQueue
     end
+    def saveState(ip, relBase)
+        @outQ << "!save"
+        @outQ << [ip, relBase, @data]
+    end
     def run()
         ip = 0
         relBase = 0
@@ -105,7 +109,14 @@ class IntCode
             ret = self.send(op[:run], *params)
             #p "returned #{ret}"
             if (op[:ret] == :value)
-                @data[paramAddrs.last] = ret
+                if (ret == "!save")
+                    #rewind that instruction and save our state
+                    ip -= 2
+                    saveState(ip, relBase)
+                    #but keep going, no need to quit
+                else
+                    @data[paramAddrs.last] = ret
+                end
             elsif op[:ret] == :jump && ret >= 0
                 ip = ret
             elsif op[:ret] == :rb

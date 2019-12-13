@@ -22,6 +22,15 @@ left = -1
 stay = 0
 right = 1
 
+def saveState(state, score)
+    filename = "#{score}.save"
+    File.open(filename, "w") { |file|
+        #@outQ << [ip, relBase, @data]
+        file.puts state[2].join(',')
+        file.puts "#{state[0]},#{state[1]}"
+    }
+end
+
 codeThread = Thread.new {
     code.run()
 }
@@ -30,16 +39,22 @@ paintThread = Thread.new {
     loop do
         #output: x, y, tile type.
         x = outQ.pop
-        y = outQ.pop
-        if x == -1 && y == 0
-            #score!
-            score = outQ.pop
-            #p "score #{score}"
+        if (x == "!save")
+            #a bit hacky but whatever
+            state = outQ.pop
+            saveState(state, score)
         else
-            tile = outQ.pop
+            y = outQ.pop
+            if x == -1 && y == 0
+                #score!
+                score = outQ.pop
+                #p "score #{score}"
+            else
+                tile = outQ.pop
 
-            #p "tile #{tile} at [#{x}, #{y}]"
-            tiles[y][x] = tile
+                #p "tile #{tile} at [#{x}, #{y}]"
+                tiles[y][x] = tile
+            end
         end
 
         break if !(codeThread.alive?) && outQ.empty?
@@ -70,6 +85,8 @@ ioThread = Thread.new {
             inQ << right
         elsif key == 'q'
             break
+        elsif key == 's'
+            inQ << "!save"
         else
             inQ << stay
         end
