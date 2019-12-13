@@ -9,7 +9,7 @@ walll=1
 block=2
 paddle=3
 ball=4
-$tileDisplay = ['_', '|', '#', '@', 'o']
+$tileDisplay = ['.', '|', '#', '@', 'o']
 
 tiles = Array.new(24) { Array.new }
 score = 0
