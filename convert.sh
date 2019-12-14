@@ -5,7 +5,7 @@ day=$1
 input=input/$day.txt
 output=$day.rb
 
-echo -e "#!/usr/bin/ruby\n\np DATA.readlines[0]\n\n__END__" | cat - $input > $output
+cat template.rb $input > $output
 chmod +x $output
 git add $output
 
