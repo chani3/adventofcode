@@ -34,11 +34,11 @@ def breakDown(chem, amount, reactions, scrap)
     if chem == "ORE"
         return amount
     elsif scrap[chem] >= amount
-        p "#{chem} all in scrap"
+        #p "#{chem} all in scrap"
         scrap[chem] -= amount
         return 0
     else
-        p "taking #{scrap[chem]} #{chem} from scrap"
+        #p "taking #{scrap[chem]} #{chem} from scrap"
         amount -= scrap[chem]
         scrap[chem] = 0
         reaction = reactions[chem]
@@ -48,14 +48,33 @@ def breakDown(chem, amount, reactions, scrap)
         ore = reaction[:inputs].sum(0) { |input|
             breakDown(input[:chem], input[:amount] * reps, reactions, scrap)
         }
-        p "#{produced} #{chem} costs #{ore} ore, #{produced - amount} surplus"
-        p "scrap: #{scrap}"
+        #p "#{produced} #{chem} costs #{ore} ore, #{produced - amount} surplus"
+        #p "scrap: #{scrap}"
         return ore
     end
 end
 
-#p scrap
-p breakDown("FUEL", 1, reactions, Hash.new(0))
+oneFuel = breakDown("FUEL", 1, reactions, Hash.new(0))
+aTrillion = 1000000000000
+fuel = aTrillion / oneFuel #we can do more, because scrap
+scrap = Hash.new(0)
+oreUsed = breakDown("FUEL", fuel, reactions, scrap)
+oreRemaining = aTrillion - oreUsed
+p "#{fuel} fuel costs #{oreUsed} ore"
+#now there's a smaller ore pool to use
+loop do
+    nextFuel = oreRemaining / oneFuel
+    if nextFuel < 1
+        nextFuel = 1
+    end
+    ore = breakDown("FUEL", nextFuel, reactions, scrap)
+    oreRemaining -= ore
+    break if oreRemaining <= 0
+    fuel += nextFuel
+    p "#{fuel} fuel leaves #{oreRemaining} ore"
+end
+p fuel
+
 
 __END__
 5 LKQCJ, 1 GDSDP, 2 HPXCL => 9 LVRSZ
