@@ -54,20 +54,20 @@ class IntCode
             5 => opJumpT, 6 => opJumpF, 7 => opLess, 8 => opEqual,
             9 => opRelBase, 99 => opEnd }
 
-    def initialize(data, inputQueue, outputQueue)
+    def initialize(data, inputQueue, outputQueue, state = [0, 0])
         @data = data.dup
         @inQ = inputQueue
         @outQ = outputQueue
+        @ip = state[0]
+        @relBase = state[1]
     end
-    def saveState(ip, relBase)
+    def saveState
         @outQ << "!save"
-        @outQ << [ip, relBase, @data]
+        @outQ << [@ip, @relBase, @data]
     end
     def run()
-        ip = 0
-        relBase = 0
         loop do
-            opField = @data[ip].digits
+            opField = @data[@ip].digits
             opCode = opField[0]
             if opField[1]
                 opCode += 10*opField[1]
@@ -85,20 +85,20 @@ class IntCode
             #p "pM is #{paramModes}"
             #get params
             op[:params].times { |i|
-                ip+=1
+                @ip+=1
                 if paramModes[i] == 1
-                    paramAddrs[i] = ip
+                    paramAddrs[i] = @ip
                     #p "direct mode #{i}"
                 else
-                    paramAddrs[i] = @data[ip]
+                    paramAddrs[i] = @data[@ip]
                     #p "normal mode #{i}"
                     if paramModes[i] == 2
-                        paramAddrs[i] += relBase
+                        paramAddrs[i] += @relBase
                         #p "rel mode #{i}"
                     end
                 end
             }
-            ip += 1
+            @ip += 1
             #p "addrs #{paramAddrs}"
             params = paramAddrs.map { |addr| @data[addr] || 0 }
             #have to get the exact right # of args now
@@ -111,17 +111,17 @@ class IntCode
             if (op[:ret] == :value)
                 if (ret == "!save")
                     #rewind that instruction and save our state
-                    ip -= 2
-                    saveState(ip, relBase)
+                    @ip -= 2
+                    saveState
                     #but keep going, no need to quit
                 else
                     @data[paramAddrs.last] = ret
                 end
             elsif op[:ret] == :jump && ret >= 0
-                ip = ret
+                @ip = ret
             elsif op[:ret] == :rb
-                relBase += ret
-                #p "set rb to #{relBase}"
+                @relBase += ret
+                #p "set rb to #{@relBase}"
             end
         end
     end

@@ -1,8 +1,35 @@
 #!/usr/bin/ruby
 
 require_relative "./intcode"
-data=DATA.readlines[0].split(',').map(&:to_i)
-data[0] = 2
+
+boardHeight = 24
+data = nil
+state = nil
+tiles = nil
+
+def readIntArray(io)
+    line = io.gets
+    #p "read: #{line}"
+    return line.split(',').map(&:to_i)
+end
+def writeIntArray(io, array)
+    io.puts array.join(',')
+end
+if ARGV.length > 0
+    #restore!
+    filename = ARGV[0]
+    File.open(filename, "r") { |file|
+        data = readIntArray(file)
+        state = readIntArray(file)
+        tiles = Array.new(boardHeight) { 
+            readIntArray(file)
+        }
+    }
+else
+    data = readIntArray(DATA)
+    data[0] = 2
+    tiles = Array.new(boardHeight) { Array.new }
+end
 
 empty=0
 walll=1
@@ -11,23 +38,30 @@ paddle=3
 ball=4
 $tileDisplay = ['.', '|', '#', '@', 'o']
 
-tiles = Array.new(24) { Array.new }
 score = 0
 
 inQ = Queue.new
 outQ = Queue.new
-code = IntCode.new(data, inQ, outQ)
+
+if (state)
+    code = IntCode.new(data, inQ, outQ, state)
+else
+    code = IntCode.new(data, inQ, outQ)
+end
 
 left = -1
 stay = 0
 right = 1
 
-def saveState(state, score)
+def saveState(state, score, tiles)
     filename = "#{score}.save"
     File.open(filename, "w") { |file|
         #@outQ << [ip, relBase, @data]
-        file.puts state[2].join(',')
-        file.puts "#{state[0]},#{state[1]}"
+        writeIntArray(file, state[2])
+        writeIntArray(file, state[0..1])
+        tiles.each { |line|
+            writeIntArray(file, line)
+        }
     }
 end
 
@@ -42,7 +76,7 @@ paintThread = Thread.new {
         if (x == "!save")
             #a bit hacky but whatever
             state = outQ.pop
-            saveState(state, score)
+            saveState(state, score, tiles)
         else
             y = outQ.pop
             if x == -1 && y == 0
@@ -76,8 +110,8 @@ ioThread = Thread.new {
     loop do
         #p "paintthread status #{paintThread.status}"
         drawBoard(tiles, score)
-        input = gets
-        p "input: #{input}"
+        input = STDIN.gets
+        #p "input: #{input}"
         key = input[0]
         if key == '['
             inQ << left
