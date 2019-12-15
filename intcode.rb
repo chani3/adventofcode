@@ -1,5 +1,9 @@
 
 class IntCode
+    def self.strToCode(s)
+        return line.split(',').map(&:to_i)
+    end
+
     def getInput
         #p "input"
         num = @inQ.pop
@@ -124,6 +128,52 @@ class IntCode
                 #p "set rb to #{@relBase}"
             end
         end
+    end
+end
+
+class IntCodeInteractive
+    def strToCode(s)
+        return s.split(',').map(&:to_i)
+    end
+    def drawBoard(tiles)
+        tiles.each { |row|
+            line = ""
+            row.each { |tile|
+                line += @tileDisplay[tile]
+            }
+            p line
+        }
+    end
+
+    def initialize(dataString, state, tileDisplay)
+        @inQ = Queue.new
+        @outQ = Queue.new
+        @tileDisplay = tileDisplay
+
+        data = strToCode(dataString)
+        #TODO clean this up
+        if (state)
+            @code = IntCode.new(data, @inQ, @outQ, state)
+        else
+            @code = IntCode.new(data, @inQ, @outQ)
+        end
+
+    end
+    def run
+        codeThread = Thread.new {
+            @code.run()
+        }
+
+        ioThread = Thread.new {
+            loop do
+                tiles = yield(@inQ, @outQ)
+                break if !tiles
+                drawBoard(tiles)
+                #break if !(codeThread.alive?) && outQ.empty?
+            end
+        }
+
+        ioThread.join
     end
 end
 
