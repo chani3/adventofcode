@@ -18,8 +18,8 @@ west = 3
 east = 4
 
 wall = 0
-moved = 1
-movedOntoOxygen = 2
+space = 1
+oxygen = 2
 start = 3
 unknown = 4
 dragon = 5
@@ -40,9 +40,12 @@ $maxY = 0
 
 runner = IntCodeInteractive.new(data[0], nil, tileDisplay)
 
-def addMove(move)
+def tryMove(move)
     diff = $moveMap[move]
-    newLoc = [$location[0] + diff[0], $location[1] + diff[1]]
+    [$location[0] + diff[0], $location[1] + diff[1]]
+end
+def addMove(move)
+    newLoc = tryMove(move)
     #now make sure we don't fall off the edge of the map
     if newLoc[0] < $minX
         $minX = newLoc[0]
@@ -57,23 +60,60 @@ def addMove(move)
     newLoc
 end
 
-runner.run { |inQ, outQ|
-    #trying to do everything in one method
+def pickNextMove(tiles)
+    #now let's try making a bot move for us
+    #but we don't just want it to follow a wall
+    #we want to pick unexplored places?
+    (1..4).each { |move|
+        tryLoc = tryMove(move)
+        if !tiles.has_key?(tryLoc)
+            return move
+        end
+    }
+    #and if they aren't adjacent, then, backtrack how?
+    #apparently we can follow the wall
+    (1..4).each { |move|
+        tryLoc = tryMove(move)
+        if tiles[tryLoc] == 1 
+            return move
+        end
+    }
+
+end
+
+def inputNextMove
+    #FIXME use raw mode
     input = STDIN.gets
     key = input[0]
     if key == 'q'
-        next false
+        return nil
     end
-    move = keyMap[key] 
+    #FIXME not gonna compile
+    move = keyMap[key]
     if !move
         p "invalid move"
-        next []
+        return []
     end
+    return move
+end
 
+runner.run { |inQ, outQ|
+    #p "pausing for input"
+    #input = STDIN.gets
+    #p "picking..."
+    move = pickNextMove(tiles)
+    p "bot picked #{move}"
     inQ << move
     #now that we've sent a movement, get back an update
+    #p "popping"
     status = outQ.pop
-    #p "status #{status}"
+    if status == oxygen
+        #FIXME draw one last time
+        p "found it, direction #{move}"
+        next false
+    end
+
+    p "status #{status}"
     newLoc = addMove(move)
     tiles[newLoc.dup] = status
     if status != wall
