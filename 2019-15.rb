@@ -60,25 +60,25 @@ def addMove(move)
     newLoc
 end
 
-def pickNextMove(tiles)
-    #now let's try making a bot move for us
-    #but we don't just want it to follow a wall
-    #we want to pick unexplored places?
-    (1..4).each { |move|
-        tryLoc = tryMove(move)
-        if !tiles.has_key?(tryLoc)
-            return move
-        end
-    }
-    #and if they aren't adjacent, then, backtrack how?
-    #apparently we can follow the wall
-    (1..4).each { |move|
-        tryLoc = tryMove(move)
-        if tiles[tryLoc] == 1 
-            return move
-        end
-    }
+$nextLeft = { north => east, east => south, south => west, west => north }
+$nextRight = { north => west, west => south, south => east, east => north }
 
+def pickNextMove(tiles, lastMove)
+    #now let's try making a bot move for us
+    #now we *do* want it to follow a wall
+    #which means... first it wants to go left, then straight, right, back.
+    #but nsew aren't ordered well, so we need another map
+    move = $nextLeft[lastMove]
+    #p "last was #{lastMove}"
+    4.times {
+        tryLoc = tryMove(move)
+        #p "trying #{move}, tile #{tiles[tryLoc]}"
+        if tiles[tryLoc] != 0
+            return move
+        end
+        move = $nextRight[move]
+    }
+    p "you're trapped? inconceivable!"
 end
 
 def inputNextMove
@@ -97,27 +97,42 @@ def inputNextMove
     return move
 end
 
+lastMove = north
+state = "start"
+
 runner.run { |inQ, outQ|
+    if state == "end"
+        next false
+    end
     #p "pausing for input"
     #input = STDIN.gets
     #p "picking..."
-    move = pickNextMove(tiles)
-    p "bot picked #{move}"
+    move = pickNextMove(tiles, lastMove)
+    #p "bot picked #{move}"
+    lastMove = move
     inQ << move
     #now that we've sent a movement, get back an update
     #p "popping"
     status = outQ.pop
     if status == oxygen
-        #FIXME draw one last time
         p "found it, direction #{move}"
-        next false
+        state = "end"
     end
 
-    p "status #{status}"
+    #p "status #{status}"
     newLoc = addMove(move)
-    tiles[newLoc.dup] = status
+    #don't overwrite start point
+    if (! tiles.has_key?(newLoc))
+        tiles[newLoc.dup] = status
+    end
     if status != wall
         $location = newLoc
+    end
+
+    if state == "mid"
+        next []
+    elsif state == "start"
+        state = "mid"
     end
     #p tiles
     #p $location
