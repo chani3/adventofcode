@@ -15,6 +15,9 @@ tileDisplay = []
 map = [[]]
 currentLine = 0
 
+#robot time!
+data[0][0] = '2'
+
 runner = IntCodeInteractive.new(data[0], nil, tileDisplay)
 
 def drawBoard(tiles)
@@ -38,13 +41,26 @@ def doIntersections(map)
     sum
 end
 
-runner.run { |inQ, outQ|
+#omfg we have to write code that inputs code
+#make the robot prefer straightlines
+#three function, 20c limit, including commas but not newline
+
+def sendCode(codeString, inQ)
+    codeString.bytes.each { |byte|
+        inQ << byte
+    }
+end
+
+def getMap(outQ, map, currentLine)
     charCode = outQ.pop
     if charCode == "!exit"
         p "height #{map.length} width #{map[0].length}"
         drawBoard(map)
-        p doIntersections(map)
-        next false
+        #p doIntersections(map)
+        return false
+    elsif charCode > 999 #lol hax
+        p "dust #{charCode}"
+        return false
     end
     char = charCode.chr
     if char == "\n"
@@ -54,6 +70,18 @@ runner.run { |inQ, outQ|
         map[currentLine] << char
     end
     []
+end
+
+runner.run { |inQ, outQ|
+    sendCode("A,B,A,C,A,B,C,B,C,A\n", inQ)
+    sendCode("L,12,R,4,R,4,L,6\n", inQ)
+    sendCode("L,12,R,4,R,4,R,12\n", inQ)
+    sendCode("L,10,L,6,R,4\n", inQ)
+    sendCode("n\n", inQ)
+
+    ret = getMap(outQ, map, currentLine)
+    p "ret #{ret}"
+    ret
 }
 
 __END__
