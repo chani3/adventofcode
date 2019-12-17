@@ -40,6 +40,10 @@ $maxY = 0
 
 runner = IntCodeInteractive.new(data[0], nil, tileDisplay)
 
+def tryMoveL(move, location)
+    diff = $moveMap[move]
+    [location[0] + diff[0], location[1] + diff[1]]
+end
 def tryMove(move)
     diff = $moveMap[move]
     [$location[0] + diff[0], $location[1] + diff[1]]
@@ -97,8 +101,30 @@ def inputNextMove
     return move
 end
 
+def propogate(tiles, start)
+    minutes = 0
+    round = [start]
+    loop do
+        nextRound = []
+        round.each { |edge|
+            (1..4).each { |move|
+                tryLoc = tryMoveL(move, edge)
+                if tiles[tryLoc] == 1 || tiles[tryLoc] == 3
+                    tiles[tryLoc] = 2
+                    nextRound << tryLoc.dup
+                end
+            }
+        }
+        round = nextRound
+        break if nextRound.length == 0
+        minutes += 1
+    end
+    minutes
+end
+
 lastMove = north
 state = "start"
+oxygenLoc = nil
 
 runner.run { |inQ, outQ|
     if state == "end"
@@ -109,30 +135,40 @@ runner.run { |inQ, outQ|
     #p "picking..."
     move = pickNextMove(tiles, lastMove)
     #p "bot picked #{move}"
-    lastMove = move
     inQ << move
     #now that we've sent a movement, get back an update
     #p "popping"
     status = outQ.pop
-    if status == oxygen
-        p "found it, direction #{move}"
-        state = "end"
-    end
 
     #p "status #{status}"
     newLoc = addMove(move)
+    if status == oxygen
+        p "found it, location #{newLoc}"
+        oxygenLoc = newLoc
+        #state = "end"
+    end
     #don't overwrite start point
     if (! tiles.has_key?(newLoc))
         tiles[newLoc.dup] = status
     end
     if status != wall
+        lastMove = move
         $location = newLoc
+        if newLoc == [0,0]
+            p "done mapping"
+            state = "oxygen"
+        end
     end
 
     if state == "mid"
         next []
     elsif state == "start"
         state = "mid"
+    elsif state == "oxygen"
+        #time to propogate
+        time = propogate(tiles, oxygenLoc)
+        p "#{time} minutes"
+        state = "end"
     end
     #p tiles
     #p $location
