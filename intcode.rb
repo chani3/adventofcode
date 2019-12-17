@@ -83,6 +83,7 @@ class IntCode
             #p "opfield is #{opField}"
             #p "op is #{op}"
             if op[:ret] == :exit
+                output "!exit"
                 return
             end
 
