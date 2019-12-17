@@ -20,39 +20,50 @@ smallBasePattern = [0, 1, 0, -1]
 basePattern = smallBasePattern * (list.length/4 + 2)
 
 $patterns = {}
-pData = nil
-$pDataFile = "2019-16.patterns"
-File.open($pDataFile, "r") { |file|
-    pData = file.readlines
-}
-pData.each.with_index { |line, i|
-    $patterns[i] = line.split(',').map(&:to_i)
-}
+#pData = nil
+#$pDataFile = "2019-16.patterns"
+#File.open($pDataFile, "r") { |file|
+#    pData = file.readlines
+#}
+#pData.each.with_index { |line, i|
+#    $patterns[i] = line.split(',').map(&:to_i)
+#}
+
+def getPatternIndex(div, i)
+    (i+1)/div
+end
 
 def generatePattern(basePattern, pos, length)
     if ! $patterns.has_key? pos
-        p "making pattern #{pos}"
+        #p "making pattern #{pos}"
         div = pos+1
         $patterns[pos] = Array.new(length) { |i|
-            basePattern[((i+1)/div)]
+            basePattern[getPatternIndex(div, i)]
         }
-        File.open($pDataFile, "a") { |file|
-            file.puts $patterns[pos].join(",")
-        }
+        #File.open($pDataFile, "w") { |file|
+        #    file.puts $patterns[pos].join(",")
+        #}
 
-        p "made pattern"
+        #p "made pattern"
     end
     $patterns[pos]
 end
 
 def applyPatternToIndex(basePattern, list, i)
     p "#{i}"
-    pattern = generatePattern(basePattern, i, list.length)
+    #pattern = generatePattern(basePattern, i, list.length)
     #p "pattern for #{i}: #{pattern}"
     value = 0
-    list.each.with_index { |e, i|
-        #p "adding #{e} * #{i}"
-        value += e * pattern[i]
+    div = i+1
+    list.each.with_index { |e, i2|
+        #p "adding #{e} * #{i2}"
+        p = basePattern[(i2+1)/div]
+        case p
+        when 1
+            value += e
+        when -1
+            value -= e
+        end
     }
     value.abs % 10
 end
@@ -64,8 +75,10 @@ def applyPatternToList(basePattern, list)
     }
 end
 
+p list.length
 p offset
 100.times { list = applyPatternToList(basePattern, list) }
+#p list[0, 8]
 p list[offset, 8]
 
 __END__
