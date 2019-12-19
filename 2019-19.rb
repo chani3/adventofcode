@@ -15,33 +15,47 @@ stationary = 0
 pulled = 1
 map = Array.new(50) { Array.new(50, 2) }
 
+#so. for my input, the angle is just over the 45 line.
+#with the exception of [0,0] the first x with beam is > y, so all beam-x >y
+#that gives me a starting search point for a given y, but how do I know how
+#close the beam is to fitting a 100-box?
+#I can test whether it fits by finding x, y then checking x+99,y-99.
+#the answer will be x,y-99.
+#but the dumb implementation should be too slow?
+
+nextY = 50
+
+def tryPoint(x, y, inQ, outQ, runner)
+    inQ << x
+    inQ << y
+    status = outQ.pop
+    #p "#{x}, #{y} is #{status}"
+    exitFlag = outQ.pop
+    if exitFlag != "!exit"
+        p "something went very wrong"
+    end
+    runner.reboot
+    status
+end
+
+
 tileDisplay = ['.', '#', '?']
 runner = IntCodeInteractive.new(data[0], nil, tileDisplay)
 runner.run { |inQ, outQ|
-    if map[0][0] != 2
-        #time to count the beam spots
-        beamSize = map.sum(0) { |row|
-            row.sum(0) { |tile| tile == pulled ? 1 : 0 }
-        }
-        p "#{beamSize} points"
+    nextX = nextY + 1
+    loop do
+        status = tryPoint(nextX, nextY, inQ, outQ, runner)
+        break if status == pulled
+        nextX += 1
+    end
+    status = tryPoint(nextX+99, nextY-99, inQ, outQ, runner)
+    if status == pulled
+        p "holy shit found it: #{nextX*10000+(nextY-99)}"
         next false
     end
-    (0..49).each { |y|
-        (0..49).each { |x|
-            inQ << x
-            inQ << y
-            status = outQ.pop
-            #p "#{x}, #{y} is #{status}"
-            map[y][x] = status
-            exitFlag = outQ.pop
-            if exitFlag != "!exit"
-                p "something went very wrong"
-            end
-            runner.reboot
-            #map[nextPos.dup] = status
-        }
-    }
-    map
+    #p "not row #{nextY}"
+    nextY += 1
+    []
 }
 
 __END__
