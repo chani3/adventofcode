@@ -152,6 +152,7 @@ class IntCodeInteractive
         @tileDisplay = tileDisplay
 
         data = strToCode(dataString)
+        @data = data
         #TODO clean this up
         if (state)
             @code = IntCode.new(data, @inQ, @outQ, state)
@@ -159,6 +160,13 @@ class IntCodeInteractive
             @code = IntCode.new(data, @inQ, @outQ)
         end
 
+    end
+    def reboot
+        #probably not safe to run if the intcode isn't done
+        @code = IntCode.new(@data, @inQ, @outQ)
+        Thread.new {
+            @code.run()
+        }
     end
     def run
         codeThread = Thread.new {
