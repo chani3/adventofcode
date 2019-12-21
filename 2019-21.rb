@@ -60,7 +60,11 @@ runner.run { |inQ, outQ|
     sendCode("NOT A T\n", inQ)
     sendCode("OR T J\n", inQ)
     sendCode("AND D J\n", inQ)
-    sendCode("WALK\n", inQ)
+    sendCode("NOT D T\n", inQ)
+    sendCode("OR E T\n", inQ)
+    sendCode("OR H T\n", inQ)
+    sendCode("AND T J\n", inQ)
+    sendCode("RUN\n", inQ)
 
     ret = getMap(outQ, map)
     #p "ret #{ret}"
