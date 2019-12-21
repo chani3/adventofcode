@@ -146,7 +146,7 @@ class IntCodeInteractive
         }
     end
 
-    def initialize(dataString, state, tileDisplay)
+    def initialize(dataString, state = nil, tileDisplay = [])
         @inQ = Queue.new
         @outQ = Queue.new
         @tileDisplay = tileDisplay
