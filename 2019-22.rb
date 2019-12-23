@@ -10,45 +10,61 @@ else
     data = DATA.readlines
 end
 
-#$deckSize = 10.freeze
-$deckSize = 10007.freeze
+$deckSize = 10.freeze
+#$deckSize = 10007.freeze
+#$deckSize = 119315717514047.freeze
+#reps = 101741582076661.freeze
+reps = 1
 
-deck = Array.new($deckSize) { |i| i }
+#deck = Array.new($deckSize) { |i| i }
+#card = 2020
+card = 2
 
-def dealStack(deck)
-    p "dealing"
-    deck.reverse
+def dealStack(pos)
+    #p "dealing"
+    #deck.reverse
+    $deckSize - pos - 1
 end
 
-def cutN(n, deck)
-    p "cutting #{n}"
-    deck[n..-1] + deck[0..n-1]
+def cutN(n, pos)
+    #p "cutting #{n}"
+    #deck[n..-1] + deck[0..n-1]
+    (pos + n) % $deckSize
 end
 
-def incN(n, deck)
-    p "inc #{n}"
-    newDeck = Array.new($deckSize)
-    deck.each_index { |i|
-        newDeck[(i*n) % $deckSize] = deck[i]
+def incN(n, pos)
+    #p "inc #{n}"
+    #newDeck = Array.new($deckSize)
+    #deck.each_index { |i|
+    #    newDeck[(i*n) % $deckSize] = deck[i]
+    #}
+    #return newDeck
+    pos/n + ($deckSize-((pos % n)*n % $deckSize)) % $deckSize
+end
+
+data.reverse!
+
+reps.times { |i|
+    p "rep #{i}"
+    data.each { |line|
+        p "card #{card}"
+        case line
+        when "deal into new stack\n"
+            card = dealStack(card)
+        when /cut (-?\d+)/
+            card = cutN($1.to_i, card)
+        when /deal with increment (\d+)/
+            card = incN($1.to_i, card)
+        else
+            p "not implemented!!!!"
+        end
     }
-    return newDeck
-end
-
-data.each { |line|
-    case line
-    when "deal into new stack\n"
-        deck = dealStack(deck)
-    when /cut (-?\d+)/
-        deck = cutN($1.to_i, deck)
-    when /deal with increment (\d+)/
-        deck = incN($1.to_i, deck)
-    else
-        p "not implemented!!!!"
-    end
 }
 
 #p deck
-p deck.index(2019)
+#p deck.index(2019)
+#p deck[2020]
+p card
 
 __END__
 deal into new stack
