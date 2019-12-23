@@ -10,6 +10,7 @@ class IntCode
             num = @inQ.pop(@non_block)
         rescue ThreadError
             #p "nonblocking io"
+            sleep 1
             return -1
         end
         #p "got #{num}"
