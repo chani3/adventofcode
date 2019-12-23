@@ -6,7 +6,12 @@ class IntCode
 
     def getInput
         #p "input"
-        num = @inQ.pop
+        begin
+            num = @inQ.pop(@non_block)
+        rescue ThreadError
+            #p "nonblocking io"
+            return -1
+        end
         #p "got #{num}"
         return num
     end
@@ -58,12 +63,14 @@ class IntCode
             5 => opJumpT, 6 => opJumpF, 7 => opLess, 8 => opEqual,
             9 => opRelBase, 99 => opEnd }
 
-    def initialize(data, inputQueue, outputQueue, state = [0, 0])
+    def initialize(data, inputQueue, outputQueue, state = nil, nb = false)
         @data = data.dup
         @inQ = inputQueue
         @outQ = outputQueue
+        state ||= [0, 0]
         @ip = state[0]
         @relBase = state[1]
+        @non_block = nb
     end
     def saveState
         @outQ << "!save"
