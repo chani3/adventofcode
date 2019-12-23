@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require_relative "./intcode"
+require_relative "./ascii"
 data = nil
 if ARGV.length > 0
     filename = ARGV[0]
@@ -11,62 +12,27 @@ else
     data = DATA.readlines
 end
 
-map = [[]]
-$currentLine = 0
 runner = IntCodeInteractive.new(data[0])
-
-def sendCode(codeString, inQ)
-    codeString.bytes.each { |byte|
-        inQ << byte
-    }
-end
-
-def drawBoard(tiles)
-    tiles.each { |row|
-        p row.join('')
-    }
-end
-def getMap(outQ, map)
-    charCode = outQ.pop
-    if charCode == "!exit"
-        p "height #{map.length} width #{map[0].length}"
-        drawBoard(map)
-        #p doIntersections(map)
-        return false
-    elsif charCode > 999 #lol hax
-        p "dust #{charCode}"
-        return false
-    end
-    char = charCode.chr
-    if char == "\n"
-        #p "newline ##{$currentLine}"
-        $currentLine += 1
-        map << []
-    else
-        #p "got #{char}?"
-        map[$currentLine] << char
-    end
-    []
-end
+ascii = AsciiCode.new(runner)
 
 #code: max 15 instructions, one per line, ends wiuth WALK
 #if A and D are holes, you've lost already
 #if B/C is a hole and D is ground, you can hope that jumping won't put you in a bad place
 #but I dunno if you can be sure.
 runner.run { |inQ, outQ|
-    sendCode("NOT C J\n", inQ)
-    sendCode("NOT B T\n", inQ)
-    sendCode("OR T J\n", inQ)
-    sendCode("NOT A T\n", inQ)
-    sendCode("OR T J\n", inQ)
-    sendCode("AND D J\n", inQ)
-    sendCode("NOT D T\n", inQ)
-    sendCode("OR E T\n", inQ)
-    sendCode("OR H T\n", inQ)
-    sendCode("AND T J\n", inQ)
-    sendCode("RUN\n", inQ)
+    ascii.sendCode("NOT C J\n")
+    ascii.sendCode("NOT B T\n")
+    ascii.sendCode("OR T J\n")
+    ascii.sendCode("NOT A T\n")
+    ascii.sendCode("OR T J\n")
+    ascii.sendCode("AND D J\n")
+    ascii.sendCode("NOT D T\n")
+    ascii.sendCode("OR E T\n")
+    ascii.sendCode("OR H T\n")
+    ascii.sendCode("AND T J\n")
+    ascii.sendCode("RUN\n")
 
-    ret = getMap(outQ, map)
+    ret = ascii.getMap()
     #p "ret #{ret}"
     ret
 }

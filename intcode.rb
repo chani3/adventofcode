@@ -133,6 +133,8 @@ class IntCode
 end
 
 class IntCodeInteractive
+    attr_accessor :inQ, :outQ
+
     def strToCode(s)
         return s.split(',').map(&:to_i)
     end
