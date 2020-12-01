@@ -1,16 +1,11 @@
 #!/usr/bin/ruby
+require_relative "../helpers"
 
-data = nil
-if ARGV.length > 0
-    filename = ARGV[0]
-    File.open(filename, "r") { |file|
-        data = file.readlines
-    }
-else
-    data = DATA.readlines
-end
+data = Helpers.loadData
 
-p data
+nums = Helpers.linesToInts(data)
+p nums[0]
+#p data[0]
 
 __END__
 1150
