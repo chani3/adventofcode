@@ -4,8 +4,10 @@
 day=$1
 input=input/$day.txt
 output=$day.rb
+mydir=$(dirname "$0")
 
-cat template.rb $input > $output
+#echo "stuff: $me $mydir/template.rb $input  $output"
+cat $mydir/template.rb $input > $output
 chmod +x $output
 git add $output
 
