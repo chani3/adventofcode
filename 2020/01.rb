@@ -4,8 +4,18 @@ require_relative "../helpers"
 data = Helpers.loadData
 
 nums = Helpers.linesToInts(data)
-p nums[0]
-#p data[0]
+#p nums[0]
+
+#find numbers that add to 2020, then multiply them
+prevNums = Array.new(2021, false)
+nums.each { |num|
+  complement = 2020 - num
+  if prevNums[complement]
+    p num * complement
+    return
+  end
+  prevNums[num] = true
+}
 
 __END__
 1150
