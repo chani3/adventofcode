@@ -7,14 +7,26 @@ nums = Helpers.linesToInts(data)
 #p nums[0]
 
 #find numbers that add to 2020, then multiply them
-prevNums = Array.new(2021, false)
+foundNums = Array.new(2021, false)
 nums.each { |num|
   complement = 2020 - num
-  if prevNums[complement]
+  if foundNums[complement]
     p num * complement
-    return
   end
-  prevNums[num] = true
+  foundNums[num] = true
+}
+
+nums.each { |num|
+  rem = 2020 - num
+  nums.each { |num2|
+    #FIXME could use a number twice
+    last = rem - num2
+    if last >= 0 && foundNums[last]
+      p "#{num} * #{num2} * #{last}"
+      p num * num2 * last
+      return
+    end
+  }
 }
 
 __END__
