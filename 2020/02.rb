@@ -5,6 +5,7 @@ data = Helpers.loadData
 #parse rules and passwords, count valid passwords
 
 valid = 0
+v2 = 0
 data.each { |line|
   /(?<min>\d+)-(?<max>\d+) (?<char>\w): (?<pass>\w+)/.match(line) { |m|
     min = m[:min].to_i
@@ -24,11 +25,27 @@ data.each { |line|
       valid += 1
       #p "valid"
     end
+    #part 2: totally different meanings
+    pos1 = min - 1
+    pos2 = max - 1
+    if m[:pass][pos1] == m[:char]
+      if m[:pass][pos2] != m[:char]
+        v2 += 1
+      end
+    elsif m[:pass][pos2] == m[:char]
+      v2 += 1
+    end
+
+    #p v2
     #return
   }
 }
 
 p valid
+p v2
+
+#valid = data.reduce { |v, line|
+
 
 __END__
 6-7 w: wwhmzwtwwk
