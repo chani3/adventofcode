@@ -2,7 +2,17 @@
 require_relative "../helpers"
 data = Helpers.loadData
 
-p data[0]
+#parse rules and passwords, count valid passwords
+
+valid = 0
+data.each { |line|
+  /(\d+)-(\d+) (\w): (\w+)/.match(line) { |m|
+    p m
+    return
+  }
+}
+
+p valid
 
 __END__
 6-7 w: wwhmzwtwwk
