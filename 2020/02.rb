@@ -6,8 +6,11 @@ data = Helpers.loadData
 
 valid = 0
 data.each { |line|
-  /(\d+)-(\d+) (\w): (\w+)/.match(line) { |m|
-    p m
+  /(?<min>\d+)-(?<max>\d+) (?<char>\w): (?<pass>\w+)/.match(line) { |m|
+    p m[:min]
+    p m[:max]
+    p m[:char]
+    p m[:pass]
     return
   }
 }
