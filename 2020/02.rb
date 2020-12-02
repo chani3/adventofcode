@@ -7,11 +7,24 @@ data = Helpers.loadData
 valid = 0
 data.each { |line|
   /(?<min>\d+)-(?<max>\d+) (?<char>\w): (?<pass>\w+)/.match(line) { |m|
-    p m[:min]
-    p m[:max]
-    p m[:char]
-    p m[:pass]
-    return
+    min = m[:min].to_i
+    max = m[:max].to_i
+    #parsed! now, does pass contain min-max chars?
+    charCount = m[:pass].split('').reduce(0) { |count, char|
+      #p "#{char} to #{m[:char]}"
+      if char == m[:char]
+        #p "match"
+        count + 1
+      else
+        count
+      end
+    }
+    #p "#{min} < #{charCount} < #{max}"
+    if charCount >= min && charCount <= max
+      valid += 1
+      #p "valid"
+    end
+    #return
   }
 }
 
