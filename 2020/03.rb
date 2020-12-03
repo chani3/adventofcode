@@ -1,8 +1,17 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.loadData
-
-p data[0]
+#right 3, down 1, count the trees hit
+Tree = '#'
+trees = 0
+posx = 0
+data.each { |line|
+  if line[posx] == Tree
+    trees += 1
+  end
+  posx = (posx + 3) % line.length
+}
+p trees
 
 __END__
 ..#.......#..##...#...#..#.#...
