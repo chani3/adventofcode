@@ -6,6 +6,11 @@ input=input/$day.txt
 output=$day.rb
 mydir=$(dirname "$0")
 
+if [ -e "$output" ]
+    echo $output already exists
+    exit 1
+fi
+
 #echo "stuff: $me $mydir/template.rb $input  $output"
 cat $mydir/template.rb $input > $output
 chmod +x $output
