@@ -15,4 +15,5 @@ fi
 cat $mydir/template.rb $input > $output
 chmod +x $output
 git add $output
+gca -m "problem $day"
 
