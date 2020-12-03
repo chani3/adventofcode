@@ -14,7 +14,7 @@ class Helpers
         data = file.readlines
       }
     else
-      data = DATA.readlines
+      data = DATA.readlines(chomp:true)
     end
     return data
   end
