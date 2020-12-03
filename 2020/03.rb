@@ -1,17 +1,23 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
-data = Helpers.loadData
+D = Helpers.loadData
 #right 3, down 1, count the trees hit
 Tree = '#'
-trees = 0
-posx = 0
-data.each { |line|
-  if line[posx] == Tree
-    trees += 1
-  end
-  posx = (posx + 3) % line.length
-}
-p trees
+
+def slopeTrees(right, down)
+  trees = 0
+  posx = 0
+  D.each_slice(down) { |line, *_|
+    if line[posx] == Tree
+      trees += 1
+    end
+    posx = (posx + right) % line.length
+  }
+  return trees
+end
+
+p slopeTrees(3, 1)
+p slopeTrees(1, 2) * slopeTrees(1, 1) * slopeTrees(3, 1) * slopeTrees(5, 1) * slopeTrees(7, 1)
 
 __END__
 ..#.......#..##...#...#..#.#...
