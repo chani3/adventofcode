@@ -7,6 +7,7 @@ output=$day.rb
 mydir=$(dirname "$0")
 
 if [ -e "$output" ]
+then
     echo $output already exists
     exit 1
 fi
@@ -15,5 +16,5 @@ fi
 cat $mydir/template.rb $input > $output
 chmod +x $output
 git add $output
-gca -m "problem $day"
+git commit $output -m "problem $day"
 
