@@ -1,8 +1,37 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.loadData
+#bunch of required fields
+#newlines don't matter unless there's a fully blank line
+#missing cid is still valid
+#count valid passports
 
-p data[0]
+RequiredFields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
+validCount = 0
+
+data.slice_after(/^$/).each { |passSlice|
+  passHash = {}
+  passEntries = []
+  passSlice.each { |line|
+    passEntries += line.split(' ')
+  }
+  passEntries.each { |line|
+    field, data = line.split(':')
+    passHash[field] = data
+  }
+  #p passHash
+  valid = true
+  RequiredFields.each { |field|
+    if ! passHash.has_key?(field)
+      valid = false
+      break
+    end
+  }
+  if valid
+    validCount += 1
+  end
+}
+p validCount
 
 __END__
 eyr:2028 iyr:2016 byr:1995 ecl:oth
