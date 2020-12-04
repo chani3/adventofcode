@@ -6,7 +6,25 @@ data = Helpers.loadData
 #missing cid is still valid
 #count valid passports
 
-RequiredFields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
+class Validator
+  RequiredFields = {"byr" => :byr, "iyr" => :iyr, "eyr" => :eyr, "hgt" => :hgt, "hcl" => :hcl, "ecl" => :ecl, "pid" => :pid }
+  def self.validate(passHash)
+    RequiredFields.each_key { |field|
+      if ! passHash.has_key?(field)
+        return false
+      end
+    }
+    return true
+  end
+
+  def byr(data)
+    p data
+    num = data.to_i
+    p num
+    return num >= 1920 && num <= 2002
+  end
+end
+
 validCount = 0
 
 data.slice_after(/^$/).each { |passSlice|
@@ -20,14 +38,7 @@ data.slice_after(/^$/).each { |passSlice|
     passHash[field] = data
   }
   #p passHash
-  valid = true
-  RequiredFields.each { |field|
-    if ! passHash.has_key?(field)
-      valid = false
-      break
-    end
-  }
-  if valid
+  if Validator.validate(passHash)
     validCount += 1
   end
 }
