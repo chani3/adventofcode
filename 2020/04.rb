@@ -9,19 +9,48 @@ data = Helpers.loadData
 class Validator
   RequiredFields = {"byr" => :byr, "iyr" => :iyr, "eyr" => :eyr, "hgt" => :hgt, "hcl" => :hcl, "ecl" => :ecl, "pid" => :pid }
   def self.validate(passHash)
-    RequiredFields.each_key { |field|
+    RequiredFields.each_pair { |field, fieldValidator|
       if ! passHash.has_key?(field)
+        return false
+      end
+      ret = self.send(fieldValidator, passHash[field])
+      if ! ret
         return false
       end
     }
     return true
   end
 
-  def byr(data)
-    p data
+  def self.byr(data)
     num = data.to_i
-    p num
     return num >= 1920 && num <= 2002
+  end
+  def self.iyr(data)
+    num = data.to_i
+    return num >= 2010 && num <= 2020
+  end
+  def self.eyr(data)
+    num = data.to_i
+    return num >= 2020 && num <= 2030
+  end
+  def self.hgt(data)
+    num = data.to_i
+    #p num
+    if data.match?(/^\d{3}cm$/)
+        return num >= 150 && num <= 193
+    elsif data.match?(/^\d{2}in$/)
+        return num >= 59 && num <= 76
+    end
+    return false
+  end
+  def self.hcl(data)
+    return data.match?(/^#\h{6}$/)
+  end
+  def self.ecl(data)
+    return ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].include?(data)
+  end
+  def self.pid(data)
+    return data.match?(/^\d{9}$/)
   end
 end
 
