@@ -7,14 +7,14 @@ data = Helpers.loadData
 #count valid passports
 
 module Validator
-  RequiredFields = {"byr" => :byr, "iyr" => :iyr, "eyr" => :eyr, "hgt" => :hgt, "hcl" => :hcl, "ecl" => :ecl, "pid" => :pid }
+  RequiredFields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
   module_function
   def validate(passHash)
-    RequiredFields.each_pair { |field, fieldValidator|
+    RequiredFields.each { |field|
       if ! passHash.has_key?(field)
         return false
       end
-      ret = self.send(fieldValidator, passHash[field])
+      ret = self.send(field, passHash[field])
       if ! ret
         return false
       end
