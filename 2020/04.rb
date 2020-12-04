@@ -6,9 +6,10 @@ data = Helpers.loadData
 #missing cid is still valid
 #count valid passports
 
-class Validator
+module Validator
   RequiredFields = {"byr" => :byr, "iyr" => :iyr, "eyr" => :eyr, "hgt" => :hgt, "hcl" => :hcl, "ecl" => :ecl, "pid" => :pid }
-  def self.validate(passHash)
+  module_function
+  def validate(passHash)
     RequiredFields.each_pair { |field, fieldValidator|
       if ! passHash.has_key?(field)
         return false
@@ -21,19 +22,19 @@ class Validator
     return true
   end
 
-  def self.byr(data)
+  def byr(data)
     num = data.to_i
     return num >= 1920 && num <= 2002
   end
-  def self.iyr(data)
+  def iyr(data)
     num = data.to_i
     return num >= 2010 && num <= 2020
   end
-  def self.eyr(data)
+  def eyr(data)
     num = data.to_i
     return num >= 2020 && num <= 2030
   end
-  def self.hgt(data)
+  def hgt(data)
     num = data.to_i
     #p num
     if data.match?(/^\d{3}cm$/)
@@ -43,13 +44,13 @@ class Validator
     end
     return false
   end
-  def self.hcl(data)
+  def hcl(data)
     return data.match?(/^#\h{6}$/)
   end
-  def self.ecl(data)
+  def ecl(data)
     return ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].include?(data)
   end
-  def self.pid(data)
+  def pid(data)
     return data.match?(/^\d{9}$/)
   end
 end
