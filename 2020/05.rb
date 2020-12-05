@@ -29,14 +29,27 @@ def findSeat(line)
   #p colStr
   seatId(partition(rowStr), partition(colStr))
 end
-
+#part 2: find the missing seat id where the ones above and below it both exist
+seats = Array.new(1024, false)
+minId = 1024
 maxId = data.reduce(0) { |max, line|
   id = findSeat(line)
+  seats[id] = true
+  if id < minId
+    minId = id
+  end
   #p id
   #p max
   id > max ? id : max
 }
 p maxId
+p minId
+(minId..maxId).each { |id|
+  if ! seats[id]
+    p id
+    return
+  end
+}
 
 __END__
 BFFFFFFLLR
