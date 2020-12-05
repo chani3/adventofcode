@@ -1,8 +1,42 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.loadData
+#binary partitioned space
+#part 1: get max seatId
+Front = 'F'
+Back = 'B'
+Left = 'L'
+Right = 'R'
+RowCount = 128
+ColCount = 8
+CodeMap = { Front => 0, Back => 1, Left => 0, Right => 1 }
 
-p data[0]
+def seatId(row, col)
+  #p row
+  #p col
+  8*row+col
+end
+
+def partition(str)
+  str.chars.reduce(0) { |acc, char|
+    acc*2 + CodeMap[char]
+  }
+end
+
+def findSeat(line)
+  rowStr, colStr = line.partition(/[LR]{3}/)
+  #p rowStr
+  #p colStr
+  seatId(partition(rowStr), partition(colStr))
+end
+
+maxId = data.reduce(0) { |max, line|
+  id = findSeat(line)
+  #p id
+  #p max
+  id > max ? id : max
+}
+p maxId
 
 __END__
 BFFFFFFLLR
