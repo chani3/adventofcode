@@ -1,8 +1,18 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
+require 'set'
 data = Helpers.loadData
 
-p data[0]
+#each group separated by blank line
+#count unique chars in each group, and sum them
+
+sum = data.slice_after(/^$/).reduce(0) { |sum, group|
+  set = group.reduce(Set.new) { |set, line|
+    set.merge(line.chars)
+  }
+  sum += set.size
+}
+p sum
 
 __END__
 gsvdkufnoawjmhp
