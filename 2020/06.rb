@@ -7,10 +7,16 @@ data = Helpers.loadData
 #count unique chars in each group, and sum them
 
 sum = data.slice_after(/^$/).reduce(0) { |sum, group|
-  set = group.reduce(Set.new) { |set, line|
-    set.merge(line.chars)
+  set = group.reduce(Set.new('a'..'z')) { |set, line|
+    lineSet = Set.new(line.chars)
+    #p set
+    #p lineSet
+    lineSet.empty? ? set : set & lineSet
   }
-  sum += set.size
+  sum + set.size
+  #p set.size
+  #p set
+  #return
 }
 p sum
 
