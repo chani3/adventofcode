@@ -10,14 +10,14 @@ data.each { |line|
   #'no other' is like the end colour
   base = /(?<colour>\w+ \w+) bags contain (?<contents>.+)/.match(line)
   if base[:contents].start_with?("n")
-    colours[base[:colour]] = []
+    colours[base[:colour]] = {}
   else
-    contentArray = []
+    contentHash = {}
     base[:contents].split(',').each { |str|
       content = /(?<num>\d+) (?<colour>\w+ \w+)/.match(str)
-      contentArray << content[:colour]
+      contentHash[content[:colour]] = content[:num]
     }
-    colours[base[:colour]] = contentArray
+    colours[base[:colour]] = contentHash
   end
   #p colours
 }
@@ -28,8 +28,8 @@ def searchForGold(colour, memo, colours)
   if memo.has_key?(colour)
     return memo[colour]
   end
-  array = colours[colour]
-  array.each { |subColour|
+  hash = colours[colour]
+  hash.each_key { |subColour|
     found = searchForGold(subColour, memo, colours)
     if found
       memo[colour] = true
