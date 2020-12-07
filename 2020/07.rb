@@ -1,8 +1,57 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.loadData
+#bag nesting hell
+#how many colours can contain (directly or indirectly) shiny gold?
+Target = "shiny gold"
+colours = {}
+data.each { |line|
+  #[colour] bags contain [d [colour] bags[,.]]+
+  #'no other' is like the end colour
+  base = /(?<colour>\w+ \w+) bags contain (?<contents>.+)/.match(line)
+  if base[:contents].start_with?("n")
+    colours[base[:colour]] = []
+  else
+    contentArray = []
+    base[:contents].split(',').each { |str|
+      content = /(?<num>\d+) (?<colour>\w+ \w+)/.match(str)
+      contentArray << content[:colour]
+    }
+    colours[base[:colour]] = contentArray
+  end
+  #p colours
+}
 
-p data[0]
+#okay, input parsed, now to search for gold
+memo = {Target => true}
+def searchForGold(colour, memo, colours)
+  if memo.has_key?(colour)
+    return memo[colour]
+  end
+  array = colours[colour]
+  array.each { |subColour|
+    found = searchForGold(subColour, memo, colours)
+    if found
+      memo[colour] = true
+      return true
+    end
+  }
+  memo[colour] = false
+  return false
+end
+
+count = 0
+colours.each_key { |colour|
+  if colour == Target
+    next
+  end
+  #p "checking " + colour
+  if searchForGold(colour, memo, colours)
+    #p "found"
+    count += 1
+  end
+}
+p count
 
 __END__
 dark maroon bags contain 2 striped silver bags, 4 mirrored maroon bags, 5 shiny gold bags, 1 dotted gold bag.
