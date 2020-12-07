@@ -15,7 +15,7 @@ data.each { |line|
     contentHash = {}
     base[:contents].split(',').each { |str|
       content = /(?<num>\d+) (?<colour>\w+ \w+)/.match(str)
-      contentHash[content[:colour]] = content[:num]
+      contentHash[content[:colour]] = content[:num].to_i
     }
     colours[base[:colour]] = contentHash
   end
@@ -52,6 +52,21 @@ colours.each_key { |colour|
   end
 }
 p count
+
+bagMemo = {}
+def countBags(colour, memo, colours)
+  if memo.has_key?(colour)
+    return memo[colour]
+  end
+  count = 1
+  hash = colours[colour]
+  hash.each_pair { |subColour, subCount|
+    count += countBags(subColour, memo, colours) * subCount
+  }
+  memo[colour] = count
+  return count
+end
+p countBags(Target, bagMemo, colours) - 1
 
 __END__
 dark maroon bags contain 2 striped silver bags, 4 mirrored maroon bags, 5 shiny gold bags, 1 dotted gold bag.
