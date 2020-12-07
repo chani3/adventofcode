@@ -37,7 +37,6 @@ def searchForGold(colour, memo, colours)
     end
   }
   memo[colour] = false
-  return false
 end
 
 count = 0
@@ -64,7 +63,6 @@ def countBags(colour, memo, colours)
     count += countBags(subColour, memo, colours) * subCount
   }
   memo[colour] = count
-  return count
 end
 p countBags(Target, bagMemo, colours) - 1
 
