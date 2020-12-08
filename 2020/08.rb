@@ -1,8 +1,39 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.loadData
+#omg assembly
 
-p data[0]
+class AsmCode
+  def acc(num)
+    @acc += num
+  end
+  def jmp(num)
+    @pc += num - 1
+  end
+  def nop(num)
+  end
+  def initialize(dataStrs)
+    @data = dataStrs.map { |str|
+      array = str.split(' ')
+      { :op => array[0], :num => array[1].to_i }
+    }
+    @acc = 0
+    @pc = 0
+    @valid = Array.new(@data.size, true)
+  end
+  def run
+    while @valid[@pc] do
+      @valid[@pc] = false
+      instr = @data[@pc]
+      self.send(instr[:op], instr[:num])
+      @pc += 1
+    end
+    p @acc
+  end
+end
+
+code = AsmCode.new(data)
+code.run
 
 __END__
 acc +0
