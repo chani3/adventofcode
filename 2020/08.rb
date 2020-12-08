@@ -17,23 +17,38 @@ class AsmCode
       array = str.split(' ')
       { :op => array[0], :num => array[1].to_i }
     }
+    p "#{@data.size} lines"
+  end
+  def run(opFlip)
     @acc = 0
     @pc = 0
     @valid = Array.new(@data.size, true)
-  end
-  def run
     while @valid[@pc] do
       @valid[@pc] = false
       instr = @data[@pc]
-      self.send(instr[:op], instr[:num])
+      op = instr[:op]
+      if @pc == opFlip
+        op = (op == "nop") ? "jmp" : "nop"
+        #p "op was #{instr[:op]} or #{@data[@pc][:op]}"
+        #p "op is #{op}"
+      end
+      self.send(op, instr[:num])
       @pc += 1
+      if @pc >= @data.size
+        p @acc
+        break
+      end
     end
-    p @acc
+    #p @pc
   end
 end
 
 code = AsmCode.new(data)
-code.run
+data.each_with_index {|line, i|
+  if ! line.start_with?('a')
+    code.run(i)
+  end
+}
 
 __END__
 acc +0
