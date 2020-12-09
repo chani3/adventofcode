@@ -1,8 +1,36 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
-data = Helpers.loadData
+data = Helpers.linesToInts(Helpers.loadData)
 
-p data[0]
+def findInvalid(data)
+  (25..data.length-1).each { |i|
+    target = data[i]
+    valid = false
+    min = i-25
+    max = i-1
+    (min..max).each { |j|
+      num = data[j]
+      complement = target - num
+      (min..max).each { |k|
+        if k == j #can't use the same number
+          next
+        end
+        if complement == data[k]
+          valid = true
+          break
+        end
+      }
+      if valid
+        break
+      end
+    }
+    if ! valid
+      return target
+    end
+  }
+end
+
+p findInvalid(data)
 
 __END__
 16
