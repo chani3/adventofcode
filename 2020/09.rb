@@ -1,9 +1,10 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.linesToInts(Helpers.loadData)
+End = data.length-1
 
 def findInvalid(data)
-  (25..data.length-1).each { |i|
+  (25..End).each { |i|
     target = data[i]
     valid = false
     min = i-25
@@ -25,12 +26,38 @@ def findInvalid(data)
       end
     }
     if ! valid
+      p "i #{i}"
       return target
     end
   }
 end
 
-p findInvalid(data)
+def findSet(data, target)
+  (0..End).each { |i|
+    sum = data[i]
+    min = max = sum
+    (i+1..End).each { |j|
+      sum += data[j]
+      if sum > target
+        break
+      end
+      if data[j] > max
+        max = data[j]
+      elsif data[j] < min
+        min = data[j]
+      end
+      if sum == target
+        p "i = #{i} j = #{j}"
+        p "min = #{min} max = #{max}"
+        return min + max
+      end
+    }
+  }
+end
+
+target = findInvalid(data)
+p target
+p findSet(data, target)
 
 __END__
 16
