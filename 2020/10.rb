@@ -1,8 +1,16 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
-data = Helpers.loadData
+data = Helpers.linesToInts(Helpers.loadData).sort
 
-p data[0]
+last = 0
+jolts = [0,0,0,1]
+data.each { |num|
+  jolt = num - last
+  jolts[jolt] += 1
+  last = num
+}
+
+p jolts[1]*jolts[3]
 
 __END__
 74
