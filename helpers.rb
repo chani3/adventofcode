@@ -11,7 +11,7 @@ class Helpers
     if ARGV.length > 0
       filename = ARGV[0]
       File.open(filename, "r") { |file|
-        data = file.readlines
+        data = file.readlines(chomp:true)
       }
     else
       data = DATA.readlines(chomp:true)
