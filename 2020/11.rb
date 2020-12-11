@@ -11,10 +11,14 @@ left = up = -1
 x = y = 0
 right = down = 1
 Directions = [[left, up], [left, y], [left, down], [x, up], [x, down], [right, up], [right, y], [right, down]]
-SeatLimit = 4
+SeatLimit = 5
+
+def invalid(x,y)
+  x < 0 or y < 0 or x == Width or y == Height
+end
 
 def occupied(x, y, d)
-  if x < 0 or y < 0 or x == Width or y == Height
+  if invalid(x,y)
     return 0
   end
   Person == d[y][x] ? 1 : 0
@@ -23,7 +27,16 @@ rescue NoMethodError
 end
 
 def findSeat(x, y, dir, d)
-  [x+dir[0], y+dir[1]]
+  loop do
+    x+=dir[0]
+    y+=dir[1]
+    if invalid(x,y)
+      return [-1,-1]
+    end
+    if d[y][x] != Floor
+      return [x,y]
+    end
+  end
 end
 
 def countNearby(x, y, d, debug=false)
