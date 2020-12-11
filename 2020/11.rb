@@ -1,8 +1,78 @@
 #!/usr/bin/ruby
 require_relative "../helpers"
 data = Helpers.loadData
+Floor = '.'
+Seat = 'L'
+Person = '#'
+Width = data[0].size
+Height = data.size
 
-p data[0]
+def occupied(x, y, d)
+  if x < 0 or y < 0 or x == Width or y == Height
+    return 0
+  end
+  Person == d[y][x] ? 1 : 0
+rescue NoMethodError
+  0
+end
+
+def countNearby(x, y, d, debug=false)
+  left = x-1
+  right = x+1
+  up = y-1
+  down = y+1
+  seats = [[left, up], [left, y], [left, down], [x, up], [x, down], [right, up], [right, y], [right, down]]
+  if debug
+    p seats
+  end
+  seats.sum { |pos|
+    n = occupied(pos[0], pos[1], d)
+    if debug
+      p "pos #{pos} n #{n}"
+    end
+    n
+  }
+end
+
+def totalOccupied(d)
+  d.sum { |line|
+    line.chars.sum { |char|
+      Person == char ? 1 : 0
+    }
+  }
+end
+
+loop do
+  newD = Array.new(Height) { |i| data[i].dup }
+  changeCount = 0
+  data.each_with_index { |line, y|
+    line.chars.each_with_index { |char, x|
+      if char == Seat
+        if countNearby(x, y, data) == 0
+          newD[y][x] = Person
+          changeCount+=1
+        end
+      elsif char == Person
+        #p "person"
+        if countNearby(x, y, data) >= 4
+          newD[y][x] = Seat
+          changeCount+=1
+        end
+      end
+    }
+  }
+  #p changeCount
+  #p totalOccupied(newD)
+  if changeCount == 0
+    ans = totalOccupied(data)
+    p "#{ans} seats!"
+    return
+  end
+  data = newD
+  #p data
+  #p countNearby(0,0,data, true)
+  #return
+end
 
 __END__
 LLLLLLLLLLLLLLLLLLLLLLL.LLLLLLL.L.LLLLL.LLLL.LLLLLLLLL..LLL.LLLLLLLLLLLLLL.LLLLLLLLL.LLL.LLLLLL
