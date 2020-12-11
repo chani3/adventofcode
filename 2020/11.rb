@@ -7,6 +7,12 @@ Person = '#'
 Width = data[0].size
 Height = data.size
 
+left = up = -1
+x = y = 0
+right = down = 1
+Directions = [[left, up], [left, y], [left, down], [x, up], [x, down], [right, up], [right, y], [right, down]]
+SeatLimit = 4
+
 def occupied(x, y, d)
   if x < 0 or y < 0 or x == Width or y == Height
     return 0
@@ -16,12 +22,16 @@ rescue NoMethodError
   0
 end
 
+def findSeat(x, y, dir, d)
+  [x+dir[0], y+dir[1]]
+end
+
 def countNearby(x, y, d, debug=false)
   left = x-1
   right = x+1
   up = y-1
   down = y+1
-  seats = [[left, up], [left, y], [left, down], [x, up], [x, down], [right, up], [right, y], [right, down]]
+  seats = Directions.map { |dir| findSeat(x, y, dir, d) }
   if debug
     p seats
   end
@@ -54,7 +64,7 @@ loop do
         end
       elsif char == Person
         #p "person"
-        if countNearby(x, y, data) >= 4
+        if countNearby(x, y, data) >= SeatLimit
           newD[y][x] = Seat
           changeCount+=1
         end
