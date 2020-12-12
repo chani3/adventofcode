@@ -2,7 +2,56 @@
 require_relative "../helpers"
 data = Helpers.loadData
 
-p data[0]
+LeftOf = { 'E' => 'N', 'N' => 'W', 'W' => 'S', 'S' => 'E' }
+RightOf = { 'E' => 'S', 'S' => 'W', 'W' => 'N', 'N' => 'E' }
+
+class NavCode
+  def initialize(dataStrs)
+    @data = dataStrs.map { |str|
+      { :op => str[0], :num => str.slice(1..-1).to_i }
+    }
+  end
+  def run
+    @x = 0
+    @y = 0
+    @dir = 'E'
+    @data.each { |instr|
+      self.send(instr[:op], instr[:num])
+    }
+    return @x.abs + @y.abs
+  end
+
+  def N(num)
+    @y += num
+  end
+  def E(num)
+    @x += num
+  end
+  def S(num)
+    @y -= num
+  end
+  def W(num)
+    @x -= num
+  end
+  def L(num)
+    turns = num/90
+    turns.times {
+      @dir = LeftOf[@dir]
+    }
+  end
+  def R(num)
+    turns = num/90
+    turns.times {
+      @dir = RightOf[@dir]
+    }
+  end
+  def F(num)
+      self.send(@dir, num)
+  end
+end
+
+code = NavCode.new(data)
+p code.run
 
 __END__
 F8
