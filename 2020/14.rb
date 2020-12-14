@@ -2,7 +2,27 @@
 require_relative "../helpers"
 data = Helpers.loadData
 
-p data[0]
+memHash = {}
+andMask = 0
+orMask = 0
+
+data.each { |line|
+  if line.start_with?("mask")
+    mask = /= (\w+)/.match(line)[1]
+    #p mask
+    andMask = mask.gsub('X', '1').to_i(2)
+    orMask = mask.gsub('X', '0').to_i(2)
+  else
+    /\[(?<addr>\d+)\] = (?<value>\d+)/.match(line) { |md|
+      #p md[:addr]
+      #p md[:value]
+      maskedValue = (md[:value].to_i & andMask) | orMask
+      memHash[md[:addr]] = maskedValue
+    }
+  end
+}
+
+p memHash.sum { |k, v| v }
 
 __END__
 mask = 0X10110X1001000X10X00X01000X01X01101
