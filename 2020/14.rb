@@ -5,23 +5,66 @@ data = Helpers.loadData
 memHash = {}
 andMask = 0
 orMask = 0
+floatBits = []
+floatMasks = []
+
+def setValues(memHash, addr, value, floatMasks)
+  if floatMasks.empty?
+    #p "setting #{addr} to #{value}"
+    memHash[addr] = value
+    return
+  end
+  orMask = floatMasks[0]
+  nextMasks = floatMasks[1..-1]
+  #addrA = addr & maskPair[:and]
+  addrO = addr | orMask
+  #p "#{addr} => #{addrO}"
+  setValues(memHash, addr, value, nextMasks)
+  setValues(memHash, addrO, value, nextMasks)
+end
 
 data.each { |line|
   if line.start_with?("mask")
     mask = /= (\w+)/.match(line)[1]
     #p mask
-    andMask = mask.gsub('X', '1').to_i(2)
-    orMask = mask.gsub('X', '0').to_i(2)
+    andMaskStr = mask.gsub('0', '1').gsub('X', '0')
+    andMask = andMaskStr.to_i(2)
+    orMaskStr = mask.gsub('X', '0')
+    orMask = orMaskStr.to_i(2)
+    #p andMaskStr
+    #p andMask
+    #p orMaskStr
+    #p orMask
+    floatBits = []
+    mask.chars.each_with_index { |char, i|
+      if char == 'X'
+        floatBits << 35 - i
+      end
+    }
+    floatMasks = []
+    floatBits.each { |bit|
+      orMask2 = 2**bit
+      #andMask = ~orMask
+      #floatMasks << { :and => andMask, :or => orMask }
+      floatMasks << orMask2
+    }
+    #p floatBits
+    #p floatMasks
   else
     /\[(?<addr>\d+)\] = (?<value>\d+)/.match(line) { |md|
-      #p md[:addr]
-      #p md[:value]
-      maskedValue = (md[:value].to_i & andMask) | orMask
-      memHash[md[:addr]] = maskedValue
+      addr = md[:addr].to_i
+      value = md[:value].to_i
+      maskedAddr = (addr & andMask)
+      #p maskedAddr
+      maskedAddr = maskedAddr | orMask
+      #p maskedAddr
+      setValues(memHash, maskedAddr, value, floatMasks)
     }
   end
 }
-
+#too high: 3802711313709
+#too low:  1909548489824
+#p memHash
 p memHash.sum { |k, v| v }
 
 __END__
