@@ -25,7 +25,7 @@ loop do
   end
   last = num
   lastTurn[num] = turn
-  if turn == 2020
+  if turn == 30000000
     p num
     break
   end
