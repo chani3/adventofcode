@@ -31,17 +31,59 @@ data.slice_after(/^$/).each_with_index { |slice, i|
 Rules = rules
 
 #now, validation
+def match(rule, num)
+  return (rule["minA"] <= num && num <= rule["maxA"]) || (rule["minB"] <= num && num <= rule["maxB"])
+end
 def isValid(num)
   Rules.each { |rule|
-    if (rule["minA"] < num && num < rule["maxA"]) || (rule["minB"] < num && num < rule["maxB"])
+    if match(rule, num)
       return true
     end
   }
   return false
 end
-errors = tickets.sum { |ticket| ticket.sum { |field| isValid(field) ? 0 : field }}
+validTickets = []
+errors = tickets.sum { |ticket| 
+  sum = ticket.sum { |field| isValid(field) ? 0 : field }
+  if sum == 0
+    validTickets << ticket
+  end
+  sum
+}
 #errors = isValid(tickets[0][0])
 p errors
+#validTickets = tickets.select { |ticket| ticket.all? { |field| isValid(field) } }
+
+p tickets.size
+p validTickets.size
+RuleMax = Rules.size - 1
+def matches(num, ruleSet)
+  ruleSet.select { |rule| match(rule, num) }
+end
+ruleOptions = (0..RuleMax).map { |i|
+  ruleSet = Rules
+  validTickets.each { |ticket|
+    ruleSet = matches(ticket[i], ruleSet)
+  }
+  ruleSet
+}
+
+foundRules = []
+while foundRules.size <= RuleMax do
+  ruleOptions.each_with_index { |ruleSet, i|
+    if ruleSet.size == 1
+      ruleSet[0]["index"] = i
+      foundRules << ruleSet[0]["name"]
+    end
+    ruleSet.delete_if { |rule| foundRules.include?(rule["name"]) }
+  }
+end
+
+answer = 1
+(0..5).each { |i|
+  answer *= myTicket[Rules[i]["index"]]
+}
+p answer
 
 __END__
 departure location: 49-920 or 932-950
