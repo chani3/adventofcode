@@ -2,7 +2,46 @@
 require_relative "../helpers"
 data = Helpers.loadData
 
-p data[0]
+#let's start by parsing all this shit into something nicer
+rules = []
+myTicket = []
+tickets = []
+
+def parseTicket(str)
+  str.split(',').map(&:to_i)
+end
+def parseRule(str)
+  /(?<name>[\w ]+): (?<minA>\d+)-(?<maxA>\d+) or (?<minB>\d+)-(?<maxB>\d+)/.match(str).named_captures.map { |k, v|
+    k == "name" ? [k,v] : [k,v.to_i]
+  }.to_h
+end
+
+data.slice_after(/^$/).each_with_index { |slice, i|
+  case i
+  when 0
+    rules = slice[0..-2].map { |line| parseRule(line) }
+  when 1
+    myTicket = parseTicket(slice[1])
+  when 2
+    tickets = slice[1..-1].map { |line| parseTicket(line) }
+  else
+    p "wtf!?"
+  end
+}
+Rules = rules
+
+#now, validation
+def isValid(num)
+  Rules.each { |rule|
+    if (rule["minA"] < num && num < rule["maxA"]) || (rule["minB"] < num && num < rule["maxB"])
+      return true
+    end
+  }
+  return false
+end
+errors = tickets.sum { |ticket| ticket.sum { |field| isValid(field) ? 0 : field }}
+#errors = isValid(tickets[0][0])
+p errors
 
 __END__
 departure location: 49-920 or 932-950
