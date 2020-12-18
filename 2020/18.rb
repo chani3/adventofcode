@@ -6,6 +6,7 @@ p data[0]
 
 #no bedmas, just brackets
 #also, all numbers are single-digit
+#part 2, + before *
 class MathRunner
   def initialize(dataStrs)
     @data = dataStrs
@@ -32,10 +33,22 @@ class MathRunner
         op(char)
       end
     }
+    resolveMult
     return @numStack[0]
   end
+  def resolveMult
+    if @opStack.size > 1 && @opStack[-2] == '*'
+      popOne
+    end
+  end
   def op(char)
-    @opStack[-1] = char
+    if char == '*'
+      resolveMult
+      @opStack[-1] = char
+      push
+    else
+      @opStack[-1] = char
+    end
   end
   def num(n)
     case @opStack[-1]
@@ -43,10 +56,6 @@ class MathRunner
       @numStack[-1] += n
     when '*'
       @numStack[-1] *= n
-    when '-'
-      @numStack[-1] -= n
-    when '/'
-      @numStack[-1] /= n
     end
   end
   def push
@@ -54,6 +63,10 @@ class MathRunner
     @opStack << '+'
   end
   def pop
+    resolveMult
+    popOne
+  end
+  def popOne
     n = @numStack.pop
     @opStack.pop
     num(n)
