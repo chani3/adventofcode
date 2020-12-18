@@ -4,6 +4,65 @@ data = Helpers.loadData
 
 p data[0]
 
+#no bedmas, just brackets
+#also, all numbers are single-digit
+class MathRunner
+  def initialize(dataStrs)
+    @data = dataStrs
+  end
+  def run
+    @data.sum { |str|
+      evaluate(str)
+    }
+  end
+  def evaluate(str)
+    @numStack = [0]
+    @opStack = ['+']
+    str.chars.each { |char|
+      case char
+      when '('
+        push
+      when ')'
+        pop
+      when /\d/
+        num(char.to_i)
+      when ' '
+        next
+      else
+        op(char)
+      end
+    }
+    return @numStack[0]
+  end
+  def op(char)
+    @opStack[-1] = char
+  end
+  def num(n)
+    case @opStack[-1]
+    when '+'
+      @numStack[-1] += n
+    when '*'
+      @numStack[-1] *= n
+    when '-'
+      @numStack[-1] -= n
+    when '/'
+      @numStack[-1] /= n
+    end
+  end
+  def push
+    @numStack << 0
+    @opStack << '+'
+  end
+  def pop
+    n = @numStack.pop
+    @opStack.pop
+    num(n)
+  end
+end
+
+math = MathRunner.new(data)
+p math.run
+
 __END__
 (2 + 6) * 2 + 2 + 4
 6 * 2 * 6 + (8 + 8 * (5 + 4 * 7 + 6 + 6 + 3)) * 8
