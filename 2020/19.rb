@@ -2,7 +2,94 @@
 require_relative "../helpers"
 data = Helpers.loadData
 
-p data[0]
+def parse_rules(lines)
+  rules = []
+  lines.each { |line|
+    /^(?<num>\d+): (((?<a1>\d+)( (?<a2>\d+))?( \| (?<b1>\d+)( (?<b2>\d+))?)?)|("(?<char>\w)"))$/.match(line) { |md|
+      num = md[:num].to_i
+      p md
+      content = {}
+      #to_i will make zeros here, but that's ok, a reference to rule 0 wouldn't be valid.
+      rules[num] = {:a1 => md[:a1].to_i, :a2 => md[:a2].to_i, :b1 => md[:b1].to_i, :b2 => md[:b2].to_i, :char => md[:char] }
+      p rules[num]
+    }
+  }
+  rules
+end
+def match(str, rules, ruleNum)
+  if ruleNum == 0
+    #p "base rule"
+  end
+  rule = rules[ruleNum]
+  if ! rule
+    p "uhoh. #{ruleNum} not in rules"
+  end
+  if ! str
+    p "hahaha you ran out of chars"
+    return []
+  end
+  if rule[:char]
+    #yay, endcase
+    #the rule calling us doesn't know how many chars we want
+    #so that's what we return
+    if str.start_with?(rule[:char])
+      return [1]
+    end
+    return []
+  else
+    #numbers
+    a1match = match(str, rules, rule[:a1])
+    aMatch = []
+    bMatch = []
+    if a1match.size > 0
+      #is there an a2? does it match any of our options??
+      if rule[:a2] > 0
+        a1match.each { |length|
+          a2match = match(str[length..-1], rules, rule[:a2])
+          a2match.each { |len2|
+            aMatch << length + len2
+          }
+        }
+      else
+        aMatch = a1match
+      end
+    end
+    #is there a b?
+    if rule[:b1] > 0
+      b1match = match(str, rules, rule[:b1])
+      if b1match.size > 0
+        if rule[:b2] > 0
+          b1match.each { |length|
+            b2match = match(str[length..-1], rules, rule[:b2])
+            b2match.each { |len2|
+              bMatch << length + len2
+            }
+          }
+        else
+          bMatch = b1match
+        end
+      end
+    end
+    return aMatch + bMatch
+  end
+end
+def match_lines(lines, rules)
+  lines.sum { |line|
+    #p line
+    matches = match(line, rules, 0)
+    #p matches
+    matches.include?(line.size)? 1 : 0
+  }
+end
+
+rules = []
+data.slice_after(/^$/).each_with_index {|slice, i|
+  if i == 0
+    rules = parse_rules(slice[0..-2])
+  else
+    p match_lines(slice, rules)
+  end
+}
 
 __END__
 75: 105 116 | 40 131
