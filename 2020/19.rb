@@ -5,16 +5,20 @@ data = Helpers.loadData
 def parse_rules(lines)
   rules = []
   lines.each { |line|
+    #yeah this was a nightmare to debug.
     /^(?<num>\d+): (((?<a1>\d+)( (?<a2>\d+))?( \| (?<b1>\d+)( (?<b2>\d+))?)?)|("(?<char>\w)"))$/.match(line) { |md|
       num = md[:num].to_i
-      p md
-      content = {}
+      #p md
       #to_i will make zeros here, but that's ok, a reference to rule 0 wouldn't be valid.
       rules[num] = {:a1 => md[:a1].to_i, :a2 => md[:a2].to_i, :b1 => md[:b1].to_i, :b2 => md[:b2].to_i, :char => md[:char] }
-      p rules[num]
+      #p rules[num]
     }
   }
-  rules
+  #part 2: loops and a third number
+  rules[8] = {:a1 => 42, :a2 => 0, :b1 => 42, :b2 => 8}
+  rules[11] = {:a1 => 42, :a2 => 31, :b1 => 42, :b2 => 135 }
+  rules[135] = {:a1 => 11, :a2 => 31, :b1 => 0}
+  return rules
 end
 def match(str, rules, ruleNum)
   if ruleNum == 0
